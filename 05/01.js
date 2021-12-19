@@ -4,7 +4,7 @@ const fs = require('fs');
 filePath = path.join(__dirname, 'input.txt');
 
 const input = fs.readFileSync(filePath, 'utf8');
-const lines = input.split('\r\n').map(l => {
+const lines = input.split('\n').map(l => {
     const parts = [...l.match(/(\d*)/g)].filter(x => x !== '').map(n => parseInt(n, 10));
     return {x1: parts[0], y1: parts[1], x2: parts[2], y2: parts[3]}
 });

@@ -4,7 +4,7 @@ const fs = require('fs');
 filePath = path.join(__dirname, 'input.txt');
 
 const input = fs.readFileSync(filePath, 'utf8');
-const inputLines = input.split('\r\n');
+const inputLines = input.split('\n');
 const drawnNumbers = inputLines[0].split(',');
 const boards = [];
 for(let line = 1; line < inputLines.length - 5; line+=6){

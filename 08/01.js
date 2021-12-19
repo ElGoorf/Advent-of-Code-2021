@@ -5,7 +5,7 @@ filePath = path.join(__dirname, 'input.txt');
 
 const input = fs.readFileSync(filePath, 'utf8');
 
-const lines = input.split('\r\n').filter(line => line).map(line => {
+const lines = input.split('\n').filter(line => line).map(line => {
     const [unique, output] = line.split(' | ').map(p => p.split(' '));
     return { unique, output };
 });

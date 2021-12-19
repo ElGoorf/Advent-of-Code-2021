@@ -5,7 +5,7 @@ filePath = path.join(__dirname, 'input.txt');
 
 const input = fs.readFileSync(filePath, 'utf8');
 
-let edges = input.split('\r\n').filter(line => line);
+let edges = input.split('\n').filter(line => line);
 let pairs = edges.map(edge => edge.split('-'));
 
 let routes = [];
