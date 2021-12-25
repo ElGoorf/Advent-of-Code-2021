@@ -1,43 +1,74 @@
 const path = require('path');
 const fs = require('fs');
 
+const steps = 40;
+
 filePath = path.join(__dirname, 'input.txt');
 
 const input = fs.readFileSync(filePath, 'utf8');
-
 const [polymer, rulesX] = input.split('\n\n');
 
+// create index of rules and store of state, indexed by pair
 const rules = rulesX.split(`\n`).filter(x => x).reduce((allRules, rule) => {
   const [pair, insert] = rule.split(' -> ');
-  return {...allRules, [pair]: insert}
+  return {
+    ...allRules,
+    [pair]: {
+      // index of rules
+      insert, // Letter to be inserted in this pair
+      child0: pair.charAt(0)+insert, // first of two descendant pairs generated
+      child1: insert+pair.charAt(1), // second of two descendant pairs generated
+      // store of state, appended with each step
+      steps: [0], // eg [0, 5, 7]  = this pair occurred 0 times at step 0, 5 times at step 1, 7 times at step 2, etc
+    }
+  }
 }, {});
 
-let currentPolymer = polymer;
-
-// console.log({polymer, rules}, currentPolymer);
-
-for(let step = 1; step <= 40; step++) {
-  for(let c = 0; c < currentPolymer.length -1; c += 2) {
-    let pair = currentPolymer.charAt(c) + currentPolymer.charAt(c+1);
-    currentPolymer = currentPolymer.substring(0,c+1)+rules[pair]+currentPolymer.substring(c+1, currentPolymer.length)
-  }
-  //console.log({currentPolymer})
+// initial state from given polymer
+for(let i = 0; i < polymer.length - 1; i++) {
+  const pair = polymer.charAt(i)+polymer.charAt(i+1);
+  rules[pair].steps[0]++;
 }
 
-let elements = currentPolymer.split('').reduce((acc, el) => {
-  const newAcc = {...acc};
-  if (!newAcc[el]) {
-    newAcc[el] = 1
-  } else {
-    newAcc[el]++
+for(let step = 0; step < steps; step++){
+  Object.values(rules).forEach(rule => {
+    // for each pair, get the current number of occurrences, and then
+    // apply that quantity to it's to descendant pairs.
+    const occurrences = rule.steps[step] || 0;
+    const {child0, child1} = rule;
+    if(!rules[child0].steps[step+1]) {
+      rules[child0].steps[step+1] = 0;
+    }
+    if(!rules[child1].steps[step+1]) {
+      rules[child1].steps[step+1] = 0;
+    }
+    rules[child0].steps[step+1] += occurrences;
+    rules[child1].steps[step+1] += occurrences;
+  });
+}
+
+// for each pair, count the first letter
+const letterCount = {};
+Object.entries(rules).forEach(([pair, data]) => {
+  const letter = pair.charAt(0);
+  const occurrences = data.steps[steps];
+  if(occurrences) {
+    if (!letterCount[letter]) {
+      letterCount[letter] = 0
+    }
+    letterCount[letter] += occurrences;
   }
+});
 
-  return newAcc;
-}, {});
+// don't forget the final element of the polymer
+const lastLetter = polymer.charAt(polymer.length -1);
+if (!letterCount[lastLetter]){
+  letterCount[lastLetter] = 0;
+}
+letterCount[lastLetter] += 1;
 
-const sortedElements = Object.entries(elements).sort(([e1, q1], [e2, q2]) => q2 - q1);
-
-// console.log({sortedElements});
+// sort by occurrence
+const sortedElements = Object.entries(letterCount).sort(([e1, q1], [e2, q2]) => q2 - q1);
 
 console.log(sortedElements[0][1] - sortedElements[sortedElements.length-1][1]);
-// 3259
+// 3459174981021
